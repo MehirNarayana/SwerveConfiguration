@@ -13,7 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -24,10 +24,12 @@ public class SwerveModule extends SubsystemBase {
   int dCanID;
   int tCanID;
   double offset;
+  CANcoder turningEncoder;
   PIDController turningPid = new PIDController(1, 0, 0);
   PIDController drivePid = new PIDController(0, 0, 0);
-  public SwerveModule(int driveMotorid, int turningMotorid, boolean driveMotorInverted, boolean turningMotorInverted, double offset) {
+  public SwerveModule(int driveMotorid, int turningMotorid, boolean driveMotorInverted, boolean turningMotorInverted, double offset, int encoderID) {
     driveMotor = new TalonFX(driveMotorid);
+    turningEncoder = new CANcoder(encoderID);
     steeringMotor = new TalonFX(turningMotorid);
     driveMotor.setInverted(driveMotorInverted);
     steeringMotor.setInverted(turningMotorInverted);
@@ -38,13 +40,13 @@ public class SwerveModule extends SubsystemBase {
 
   public double getDrivePosition() {
     StatusSignal<Double> pos = driveMotor.getPosition();
-    return pos.getValue().doubleValue();
+    return pos.getValue().doubleValue()/6.75;
     
   }
 
   public double getTurningPosition() {
     StatusSignal<Double> pos = steeringMotor.getPosition();
-    double currAngle = (pos.getValue().doubleValue()-offset)/2048/(150/7)*360;
+    double currAngle = (pos.getValue().doubleValue()-offset)*(150/7)*360;
     currAngle = Math.signum(currAngle)*(Math.abs(currAngle)%360);
     if (currAngle<0){
       currAngle = currAngle+360;
@@ -54,12 +56,12 @@ public class SwerveModule extends SubsystemBase {
 
   public double getDriveVelocity() {
     StatusSignal<Double> driveVelocity = driveMotor.getVelocity();
-    return driveVelocity.getValue().doubleValue();
+    return driveVelocity.getValue().doubleValue()/6.75;
   }
 
   public double getTurningVelocity() {
     StatusSignal<Double> steeringVelocity = steeringMotor.getVelocity();
-    return steeringVelocity.getValue().doubleValue()/2048/(150/7)*360;
+    return steeringVelocity.getValue().doubleValue()*(150/7)*360;
   }
 
  
@@ -85,6 +87,6 @@ public class SwerveModule extends SubsystemBase {
 
     // This method will be called once per scheduler run
   }
-
+  
 
 }

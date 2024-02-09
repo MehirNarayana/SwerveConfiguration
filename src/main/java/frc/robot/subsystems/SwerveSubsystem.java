@@ -12,27 +12,28 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 
 public class SwerveSubsystem extends SubsystemBase {
-    private final SwerveModule frontLeft = new SwerveModule(0, 1, true, true);
+    private final SwerveModule frontLeft = new SwerveModule(0, 1, true, true,0,0);
 
-    private final SwerveModule frontRight = new SwerveModule(0, 1, true, true);
+    private final SwerveModule frontRight = new SwerveModule(0, 1, true, true,0,0);
 
-    private final SwerveModule backLeft = new SwerveModule(0, 1, true, true);
+    private final SwerveModule backLeft = new SwerveModule(0, 1, true, true,0,0);
 
-    private final SwerveModule backRight = new SwerveModule(0, 1, true, true);
+    private final SwerveModule backRight = new SwerveModule(0, 1, true, true,0,0);
 
     private final AHRS gyro = new AHRS();
     double kWheelBase = 0;
     double kTrackWidth = 0;
-    public final SwerveDriveKinematics kDriveKinematics = Constants.SwerveConstants.kDriveKinematics;
+   
 
   
-    private final SwerveDriveOdometry odometer;
+    
 
     public SwerveSubsystem() {
         new Thread(() -> {
@@ -42,25 +43,9 @@ public class SwerveSubsystem extends SubsystemBase {
             } catch (Exception e) {
             }
         }).start();
-        
-
-        
-        
-        SwerveModulePosition[] modulePositions = getModulePositions();
-        odometer = new SwerveDriveOdometry(kDriveKinematics,
-        new Rotation2d(0), modulePositions);
-
-
-        
-
-
     }
 
-    public SwerveModulePosition[] getModulePositions(){
-      SwerveModulePosition[] modulePositions = {frontLeft.getPostion(), frontRight.getPostion(), 
-        backLeft.getPostion(), backRight.getPostion()};
-      return modulePositions;
-    }
+    
 
     public void zeroHeading() {
       gyro.reset();
@@ -74,9 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
       return Rotation2d.fromDegrees(getHeading());
     }
 
-    public Pose2d getPose() {
-      return odometer.getPoseMeters();
-    }
+  
 
     public void overideSpeed(double driveSpeed, double turningSpeed){
       frontLeft.overideSpeed(driveSpeed, turningSpeed);
@@ -89,10 +72,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-      SwerveModulePosition[] modulePositions = getModulePositions();
-      odometer.update(getRotation2d(), modulePositions);
-      SmartDashboard.putNumber("Robot Heading", getHeading());
-      SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
+    
+     SmartDashboard.putNumber("yaw", getHeading());
     }
 
     public void stopModules() {
